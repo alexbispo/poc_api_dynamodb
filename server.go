@@ -3,24 +3,28 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"path"
 	"strconv"
+	"path"
 )
 
 type Account struct {
-	ID   int    `json:"id"`
+	AccountId int `json:"accountId"`
+	ContractId int `json:"contractId"`
+	MainAccountId int `json:"mainAccountId"`
+	PersonId int `json:"personId"`
 	Name string `json:"name"`
+	Description string `json:"description"`
 }
 
 func main() {
 	server := http.Server{
 		Addr: ":8080",
 	}
+
 	http.HandleFunc("/accounts/", handleRequest)
 	server.ListenAndServe()
 }
 
-// main handler function
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	var err = handleGet(w, r)
 
@@ -37,7 +41,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
 	if err != nil {
 		return
 	}
-	account, err := RetrieveAccountByID(id)
+	account, err := RetrieveAccountById(id)
 	if err != nil {
 		return
 	}
