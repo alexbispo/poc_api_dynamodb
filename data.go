@@ -3,7 +3,7 @@ package main
 
 import (
 	"log"
-	"strconv"
+	// "strconv"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -11,15 +11,50 @@ import (
 )
 
 // var params = {
-// 	TableName: 'accounts',
+//     TableName: 'card_details',
+//     KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
+//         { // Required HASH type attribute
+//             AttributeName: 'indice_pk',
+//             KeyType: 'HASH',
+//         },
+//         { // Required HASH type attribute
+//             AttributeName: 'indice_sk',
+//             KeyType: 'RANGE',
+//         }
+//     ],
+//     AttributeDefinitions: [ // The names and types of all primary and index key attributes only
+//         {
+//             AttributeName: 'indice_pk',
+//             AttributeType: 'S', // (S | N | B) for string, number, binary
+//         },
+//         {
+//             AttributeName: 'indice_sk',
+//             AttributeType: 'S', // (S | N | B) for string, number, binary
+//         }
+
+//     ],
+//     ProvisionedThroughput: { // required provisioned throughput for the table
+//         ReadCapacityUnits: 5,
+//         WriteCapacityUnits: 5,
+//     }
+// };
+// dynamodb.createTable(params, function(err, data) {
+//     if (err) ppJson(err); // an error occurred
+//     else ppJson(data); // successful response
+
+// });
+
+// var params = {
+// 	TableName: 'card_details',
 // 	Item: { // a map of attribute name to AttributeValue
   
-// 		AccountId: 3,
-// 		ContractId: 2,
-// 		MainAccountId: 1,
-// 		PersonId: 2,
-// 		Name: "Alex Bispo",
-// 		Description: "Desenvolvedor"
+	// indice_pk: "card_id",
+	// indice_sk: "1234",
+	// account_id: 120,
+	// card_id: 1234,
+	// contract_id: 100,
+	// main_account_id: 10,
+	// external_code: "1xxx"
 // 	},
 //   };
 //   docClient.put(params, function(err, data) {
@@ -40,37 +75,44 @@ func init() {
 	dbSvc = dynamodb.New(sess)
 }
 
-func RetrieveAccountById(id int) (account Account, err error) {
+func RetrieveCardById(id string) (Card, error) {
 	result, err := dbSvc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("accounts"),
+		TableName: aws.String("cards_detail"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"AccountId": {
-				N: aws.String(strconv.Itoa(id)),
+			"indice_pk": {
+				S: aws.String("card_id"),
+			},
+			"indice_sk": {
+				S: aws.String(id),
 			},
 		},
 	})
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return Card{}, err
 	}
 
-	account = Account{}
+	card := Card{}
 
 	log.Println(result)
 
 	log.Println(result.Item)
 
-	err = dynamodbattribute.UnmarshalMap(result.Item, &account)
+	err = dynamodbattribute.UnmarshalMap(result.Item, &card)
 	if err != nil {
 		log.Println(err)
 	}
 
-	log.Println(account)
+	if  card.account_id != 0 {
+		log.Println(card.account_id)
+	}
 
-	return
+	log.Println(card)
+
+	return card, nil
 }
 
-// func RetrieveAccountByID(id int) (account Account, err error) {
-// 	account = Account{ID: id, Name: "Alex"}
+// func RetrieveAccountByID(id int) (card Account, err error) {
+// 	card = Account{ID: id, Name: "Alex"}
 // 	return
 // }
