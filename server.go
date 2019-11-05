@@ -3,17 +3,18 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
+	// "strconv"
 	"path"
 )
 
-type Account struct {
-	AccountId int `json:"accountId"`
-	ContractId int `json:"contractId"`
-	MainAccountId int `json:"mainAccountId"`
-	PersonId int `json:"personId"`
-	Name string `json:"name"`
-	Description string `json:"description"`
+type Card struct {
+	indice_pk string `json:"indice_pk"`
+	indice_sk string `json:"indice_sk"`
+	account_id int `json:"account_id"`
+	card_id int `json:"card_id"`
+	contract_id int `json:"contract_id"`
+	main_account_id int `json:"main_account_id"`
+	external_code string `json:"external_code"`
 }
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 		Addr: ":8080",
 	}
 
-	http.HandleFunc("/accounts/", handleRequest)
+	http.HandleFunc("/cards/", handleRequest)
 	server.ListenAndServe()
 }
 
@@ -34,18 +35,20 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Retrieve a account
+// Retrieve a card
 // GET /accounts/1
 func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
-	id, err := strconv.Atoi(path.Base(r.URL.Path))
+	// id, err := strconv.Atoi(path.Base(r.URL.Path))
+	id := path.Base(r.URL.Path)
+
+	// if err != nil {
+	// 	return
+	// }
+	card, err := RetrieveCardById(id)
 	if err != nil {
 		return
 	}
-	account, err := RetrieveAccountById(id)
-	if err != nil {
-		return
-	}
-	output, err := json.MarshalIndent(&account, "", "\t\t")
+	output, err := json.MarshalIndent(&card, "", "\t\t")
 	if err != nil {
 		return
 	}
